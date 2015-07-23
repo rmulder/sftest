@@ -1,0 +1,19 @@
+{
+    "username": "rmulder@xmission.com", 
+    "environment": "developer", 
+    "project_name": "rmulder", 
+    "workspace": "/www/htdocs", 
+    "org_url": "", 
+    "namespace": "", 
+    "id": "I3UOGSZB7ICH4X5LXY1TADLMYN5M2T79", 
+    "metadata_container": "1dci0000000GOgJAAW", 
+    "subscription": [
+        "ApexClass", 
+        "ApexComponent", 
+        "ApexPage", 
+        "ApexTrigger", 
+        "StaticResource", 
+        "CustomObject", 
+        "Profile"
+    ]
+}

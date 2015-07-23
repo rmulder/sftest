@@ -1,0 +1,67 @@
+<apex:page controller="AngularRemoting_Con">  
+  <apex:stylesheet value="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"/>
+  <apex:includeScript value="//ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"/>  
+   <!--Remoting Stuff-->  
+   <script>
+     var SVC_CONFIG = {
+         controller:AngularRemoting_Con,
+         method: 'getData' 
+     };
+     var callServerMethod = function (controller, method, callback) {
+      try {
+        controller[method](function(results, event) {
+          console.log('remoteMethod results:', results, 'event:', event);
+          if (event.status) {
+            callback((results === null)? [] : results);
+            return true;
+          }
+          return false;
+        });
+      } catch (e) {
+        console.log('error:', e.stack);
+        return false;
+      }
+    
+    };
+
+     var vfremote = angular.module('VFRemoting',[]);  
+     vfremote.factory('VFRemotingFactory',function($q,$rootScope){
+       return {
+           query: function() {
+             var deferred = $q.defer();  
+             callServerMethod(SVC_CONFIG.controller, SVC_CONFIG.method, function(result){  
+               $rootScope.$apply(function(){  
+                 deferred.resolve(result);  
+               });  
+             });  
+             return deferred.promise;  
+           }
+       };
+       /*  
+       var factory = {};  
+       factory.query = function(){  
+         var deferred = $q.defer();  
+         callServerMethod(AngularRemoting_Con, 'getData', function(result){  
+           $rootScope.$apply(function(){  
+             deferred.resolve(result);  
+           });  
+         });  
+         return deferred.promise;  
+       }  
+       return factory; 
+       */ 
+     });  
+     vfremote.controller('VFRemoteController',function($scope,VFRemotingFactory){  
+       VFRemotingFactory.query().then(function(result){  
+         $scope.data = result;  
+       });  
+     });  
+   </script>  
+   <div ng-app="VFRemoting">  
+     <div ng-controller="VFRemoteController">  
+       <ul class="list-group">  
+         <li ng-repeat="acc in data" class="list-group-item">{{acc.Name}}</li>  
+       </ul>  
+     </div>  
+   </div>  
+ </apex:page>

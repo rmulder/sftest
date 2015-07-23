@@ -1,0 +1,97 @@
+<apex:page docType="html-5.0" standardStylesheets="false" controller="JSRdemo" showHeader="false" id="PageId" cache="false" applyHtmlTag="false">
+<!--<apex:page showHeader="true" sidebar="true" controller="JSRdemo">-->
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]>      <html class="ie6"> <![endif]-->
+<!--[if IE 7]>         <html class="ie7"> <![endif]-->
+<!--[if IE 8]>         <html class="ie8"> <![endif]-->
+<!--[if gt IE 8]><!--> <html>         <!--<![endif]-->
+<head>
+  <!-- Force IE8 to run in Standards Mode: http://stackoverflow.com/questions/13896176/force-ie8-or-ie9-document-mode-to-standards -->
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0" />
+  <title>Digital Sales Platform</title>
+    <style>
+    #results {background-color: pink}
+    div.contact {background-color: lightblue; margin: 2px;}
+    </style>
+</head>
+<body id="jsrdemo">
+    <c:DragDrop parentId="{!$CurrentPage.parameters.id}" DragDropHeight="100px" />
+    <button id="getContacts">Get Contacts</button>
+    <input type="number" id="limit" value="10"></input>
+    <h1>results</h1>
+    <div id="results">
+        
+    </div>
+    <div id="contactTemplate" class="contact"></div>
+    <div>
+        <input type="text" id="firstName" placeholder="First Name" value=""></input>        
+        <input type="text" id="lastName" placeholder="Last Name" value=""></input>        
+        <button id="createContact">Create Contact</button>
+        <button id="getJSON">Get JSON Data</button>
+    </div>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/3.9.3/lodash.min.js"></script>
+    <script>
+
+    $j = jQuery.noConflict();
+
+    $j(document).ready(function() {
+        console.log('ready');
+        $j("#createContact").click(function() {
+           JSRdemo.createContact($j('#firstName').val(),$j('#lastName').val(),handleContactCreate);
+        });
+
+        $j("#getJSON").click(function() {
+           JSRdemo.getJSON(function(result,event) {
+               console.log(event);
+               var res = JSON.parse(_.unescape(result));
+                _.each(res, function (val, key) {
+                    if (res.hasOwnProperty(key)) {
+                        res[key] = JSON.parse(val); 
+                    }
+                });               
+              console.log('result:' + res);
+               var someObj = {
+                   someField: res
+               };
+               console.log('someObj:', someObj);
+           });
+        });
+
+        $j('#getContacts').click(function() {
+            $j('#results').html('');
+            var limit = $j('#limit').val();
+
+            if (typeof JSRdemo !== undefined) {
+                //Javascript remoting method here
+                JSRdemo.getContacts( limit, function(results,event) {
+                    if (event.status) {
+                        console.log(results);
+                        for (var i=0; i<results.length; i++) {
+                            var c = results[i];
+                            console.log (c);
+                            var $row = $j('#contactTemplate').clone()
+                                .attr({id:c.Id})
+                                .html('name: ' + c.Name + ' Date Created: ' + c.CreatedDate)
+                                .appendTo('#results');
+                        }
+                    } else {
+                        alert('could not contact server');
+                    }
+                });
+            }
+        });
+    });
+    function handleContactCreate(result,event) {
+     if(event.type == 'exception') {
+          alert(event.message);
+      } else {
+        alert('A contact was created with the ID: '+result);
+      }
+    }
+    </script>
+</body>
+</html>        
+</apex:page>
